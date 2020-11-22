@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.entities.Message;
 public class SheetParser {
   private final DataManager dataManager;
 
-  public SheetParser(DataManager manager) {
+  public SheetParser(final DataManager manager) {
     this.dataManager = manager;
   }
 
@@ -26,7 +26,8 @@ public class SheetParser {
    * @throws GeneralSecurityException when auth fails
    * @throws IOException IO error
    */
-  public Message output(String sheetId) throws GeneralSecurityException, IOException {
+  public Message output(final String sheetId) throws GeneralSecurityException,
+      IOException {
     MessageBuilder returnMessageBuilder = new MessageBuilder();
 
     ApiWrapper sheety = new ApiWrapper(

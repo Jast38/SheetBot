@@ -17,7 +17,7 @@ public class SheetBot {
    * @param manager dataManager to access local Storage
    * @throws IOException if IO fails
    */
-  public SheetBot(DataManager manager) throws IOException {
+  public SheetBot(final DataManager manager) throws IOException {
     this.dataManager = manager;
     this.token = dataManager.discordToken(CREDS_DISCORD_PATH);
     startBot();
