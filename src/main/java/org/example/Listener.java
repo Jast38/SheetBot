@@ -16,6 +16,11 @@ public class Listener extends ListenerAdapter {
       "print"));
   private static final String ADRIAN = "1dAEegeAXQArH_FXoSdETV8XsP4Dt7uAFaEt4-VpP0vY";
   private static final String BENNY = "1-xniicYlY5jNJiqv6qGSTVO40W_cpme9qZOorfQb1AE";
+  private final DataManager dataManager;
+
+  public Listener(DataManager manager) {
+    this.dataManager = manager;
+  }
 
   @Override
   public void onMessageReceived(MessageReceivedEvent event) {
@@ -26,7 +31,6 @@ public class Listener extends ListenerAdapter {
 
     //TODO: Iterate through COMMANDS, invoke corresponding Method when Command
     // recognized using  String Split and Reflection API
-    //TODO: better implementation of name with split String
     //TODO: add argument to SheetParser to specify Week
     String[] splitString = event.getMessage().getContentRaw().split(" ");
     if (splitString[0].equals("!sheet")) {
@@ -44,7 +48,7 @@ public class Listener extends ListenerAdapter {
             .sendMessage(commandListBuilder.build()).queue();
       } else if (splitString[1].equals(COMMANDS.get(1))) {
         //TODO: add to database, check for Validity
-        SheetParser parser = new SheetParser();
+        SheetParser parser = new SheetParser(dataManager);
         Message toPrint = null;
         try {
           if (splitString[2].equals("Adrian")) {
