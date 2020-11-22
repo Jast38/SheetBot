@@ -18,6 +18,13 @@
     <dependencies>
       <dependency>
         <groupId>com.google.cloud</groupId>
+        <artifactId>libraries-bom</artifactId>
+        <version>5.3.0</version>
+        <type>pom</type>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.cloud</groupId>
         <artifactId>google-cloud-bigquery</artifactId>
         <version>1.124.7</version>
         <scope>compile</scope>
@@ -26,13 +33,6 @@
         <groupId>com.google.cloud</groupId>
         <artifactId>google-cloud-storage</artifactId>
         <version>1.113.3</version>
-        <scope>compile</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.google.cloud</groupId>
-        <artifactId>libraries-bom</artifactId>
-        <version>5.3.0</version>
-        <type>pom</type>
         <scope>compile</scope>
       </dependency>
       <dependency>
@@ -115,8 +115,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.1</version>
           <configuration>
-            <source>1.8</source>
-            <target>1.8</target>
+            <source>1.14</source>
+            <target>1.14</target>
           </configuration>
         </plugin>
         <plugin>
