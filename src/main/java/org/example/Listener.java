@@ -8,10 +8,7 @@ import java.time.ZoneId;
 import java.util.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -57,41 +54,23 @@ public class Listener extends ListenerAdapter {
         guild.getSelfMember())) {
       deleteAfterDelay(message);
     } else if (msg.startsWith("!sheet")) {
+      message.delete().queue();
       if (msg.contains("help")) {
         reactToHelp(event);
       } else if (msg.contains("admin")) {
         reactToAdmin();
       } else if (msg.contains("print")) {
-        reactToSheet(event, author, msg);
+        reactToSheet(event.getChannel(), author, msg);
       }
     }
   }
 
-  private void deleteAfterDelay(Message message) {
-    TimerTask delete = new TimerTask() {
-      @Override
-      public void run() {
-        message.delete().queue();
-        System.out.println("Message deleted");
-      }
-    };
-
-    //delete after 2 minutes
-    LocalDateTime date = LocalDateTime.now().plusMinutes(2);
-    Date delay = Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
-
-    Timer timer = new Timer();
-    timer.schedule(delete, delay);
-    System.out.println("Deletion scheduled for " + delay);
-  }
-
-  private void reactToSheet(final GuildMessageReceivedEvent event,
+  //TODO: add to database, check for Validity of Name, check for guild
+  // -> only allow if member of that guild added
+  // db: name(id)-spreadsheetId-guild-addedBy-addedDate
+  private void reactToSheet(final TextChannel channel,
                             final User author,
                             final String messageContentRaw) {
-
-    //TODO: add to database, check for Validity of Name, check for guild
-    // -> only allow if member of that guild added
-    // db: name(id)-spreadsheetId-guild-addedBy-addedDate
     SheetParser parser = new SheetParser(dataManager);
     MessageBuilder toPrint = new MessageBuilder()
         .append(author.getAsMention())
@@ -112,7 +91,7 @@ public class Listener extends ListenerAdapter {
     if (messageContentRaw.contains("keep")) {
       toPrint.replaceFirst("```JSON", "```JAVA");
     }
-    event.getChannel().sendMessage(toPrint.build())
+    channel.sendMessage(toPrint.build())
         .queue();
   }
 
@@ -136,4 +115,24 @@ public class Listener extends ListenerAdapter {
     event.getChannel()
         .sendMessage(eb.build()).queue();
   }
+
+  private void deleteAfterDelay(Message message) {
+    TimerTask delete = new TimerTask() {
+      @Override
+      public void run() {
+        message.delete().queue();
+        System.out.println("Message deleted");
+      }
+    };
+
+    //delete after 2 minutes
+    LocalDateTime date = LocalDateTime.now().plusMinutes(2);
+    Date delay = Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
+
+    Timer timer = new Timer();
+    timer.schedule(delete, delay);
+    System.out.println("Deletion scheduled for " + delay);
+  }
 }
+
+
