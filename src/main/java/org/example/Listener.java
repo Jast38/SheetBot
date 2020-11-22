@@ -81,7 +81,7 @@ public class Listener extends ListenerAdapter {
     Date delay = Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
 
     Timer timer = new Timer();
-    timer.schedule(delete, 4000L);
+    timer.schedule(delete, delay);
     System.out.println("Deletion scheduled for " + delay);
   }
 
