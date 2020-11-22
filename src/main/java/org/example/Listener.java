@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -20,16 +19,23 @@ public class Listener extends ListenerAdapter {
       "help",
       "print",
       "admin"));
-  private static final String ADRIAN = "1dAEegeAXQArH_FXoSdETV8XsP4Dt7uAFaEt4-VpP0vY";
-  private static final String BENNY = "1-xniicYlY5jNJiqv6qGSTVO40W_cpme9qZOorfQb1AE";
+  private static final String ADRIAN =
+      "1dAEegeAXQArH_FXoSdETV8XsP4Dt7uAFaEt4-VpP0vY";
+  private static final String BENNY =
+      "1-xniicYlY5jNJiqv6qGSTVO40W_cpme9qZOorfQb1AE";
   private final DataManager dataManager;
 
-  public Listener(DataManager manager) {
+  public Listener(final DataManager manager) {
     this.dataManager = manager;
   }
 
+  /**
+   * Triggers event when message ist received in any channel.
+   *
+   * @param event MessageReceivedEvent
+   */
   @Override
-  public void onMessageReceived(MessageReceivedEvent event) {
+  public void onMessageReceived(final MessageReceivedEvent event) {
     Message message = event.getMessage();
     String msg = message.getContentRaw();
     User author = event.getAuthor();
@@ -38,7 +44,6 @@ public class Listener extends ListenerAdapter {
         + author.getName() + ": "
         + message.getContentDisplay()
     );
-
     if (msg.startsWith("!sheet")) {
       if (msg.contains("help")) {
         reactToHelp(event);
@@ -50,7 +55,8 @@ public class Listener extends ListenerAdapter {
     }
   }
 
-  private void reactToSheet(MessageReceivedEvent event, User author, String messageContentRaw) {
+  private void reactToSheet(final MessageReceivedEvent event, final User author,
+                            final String messageContentRaw) {
 
     if (messageContentRaw.contains("print")) {
       //TODO: add to database, check for Validity
@@ -74,17 +80,18 @@ public class Listener extends ListenerAdapter {
     }
   }
 
-  //TODO: implement admin features: kick members, add remove spreadsheet stuff with dataManager
+  //TODO: implement admin features: kick members, add remove spreadsheet
+  // stuff with dataManager
   private void reactToAdmin() {
   }
 
-  private void reactToHelp(MessageReceivedEvent event) {
+  private void reactToHelp(final MessageReceivedEvent event) {
     MessageBuilder commandListBuilder = new MessageBuilder();
     commandListBuilder.append("```Here is a list of my commands: \n\n")
         .append("All commands must be preceded by '!sheet ' \n\n");
 
-    for (String command :
-        COMMANDS) {
+    for (String command
+        : COMMANDS) {
       commandListBuilder.append(command).append("\n");
     }
     commandListBuilder.append("```");

@@ -27,13 +27,14 @@ public class ApiWrapper {
   /**
    * Constructor of class.
    *
-   * @param spreadsheetId Id of spreadsheet to get data from
-   * @param range range of cells to get
-   * @param manager data manager to access local data
+   * @param argSpreadsheetId Id of spreadsheet to get data from
+   * @param argRange         range of cells to get
+   * @param manager          data manager to access local data
    */
-  public ApiWrapper(String spreadsheetId, String range, DataManager manager) {
-    this.spreadsheetId = spreadsheetId;
-    this.range = range;
+  public ApiWrapper(final String argSpreadsheetId, final String argRange,
+                    final DataManager manager) {
+    this.spreadsheetId = argSpreadsheetId;
+    this.range = argRange;
     dataManager = manager;
   }
 
@@ -50,8 +51,9 @@ public class ApiWrapper {
    * Get cells specified by range of spreadsheet using spreadsheetId.
    *
    * @return 2x2 Array of rows x columns
-   * @throws GeneralSecurityException when authentication fails and http transport doesn't work
-   * @throws IOException IO error
+   * @throws GeneralSecurityException when authentication
+   *                                  fails and http transport doesn't work
+   * @throws IOException              IO error
    */
   public List<List<Object>> getCells() throws
       GeneralSecurityException, IOException {
