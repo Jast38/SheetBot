@@ -10,6 +10,11 @@ import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
 
 public class SheetParser {
+  private final DataManager dataManager;
+
+  public SheetParser(DataManager manager) {
+    this.dataManager = manager;
+  }
 
   //TODO: give spreadsheetId as argument to Listener, add using constructor
 
@@ -26,7 +31,8 @@ public class SheetParser {
 
     ApiWrapper sheety = new ApiWrapper(
         sheetId,
-        "KW 48!B4:E17");
+        "KW 48!B4:E17",
+        dataManager);
 
     List<List<Object>> values = sheety.getCells();
 

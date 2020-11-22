@@ -9,10 +9,7 @@ import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
@@ -25,10 +22,19 @@ public class ApiWrapper {
 
   private final String spreadsheetId;
   private final String range;
+  private static DataManager dataManager;
 
-  public ApiWrapper(String spreadsheetId, String range) {
+  /**
+   * Constructor of class.
+   *
+   * @param spreadsheetId Id of spreadsheet to get data from
+   * @param range range of cells to get
+   * @param manager data manager to access local data
+   */
+  public ApiWrapper(String spreadsheetId, String range, DataManager manager) {
     this.spreadsheetId = spreadsheetId;
     this.range = range;
+    dataManager = manager;
   }
 
   private static final List<String> SCOPES =
@@ -36,15 +42,8 @@ public class ApiWrapper {
 
 
   private static HttpRequestInitializer authExplicit() throws IOException {
-    InputStream in = ApiWrapper.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-    if (in == null) {
-      throw new FileNotFoundException("Resource not found: "
-          + CREDENTIALS_FILE_PATH);
-    }
-    GoogleCredentials credentials = GoogleCredentials.fromStream(in)
-        .createScoped(SCOPES);
-
-    return new HttpCredentialsAdapter(credentials);
+    return new HttpCredentialsAdapter(dataManager
+        .getCredentials(CREDENTIALS_FILE_PATH, SCOPES));
   }
 
   /**
