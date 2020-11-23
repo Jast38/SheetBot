@@ -6,11 +6,14 @@ import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.apache.commons.lang3.StringUtils;
 
 //TODO: Iterate through COMMANDS, invoke corresponding Method when Command
 // recognized using  String Split and Reflection API
@@ -76,10 +79,10 @@ public class Listener extends ListenerAdapter {
         .append(author.getAsMention())
         .append("\n\n");
     try {
-      if (org.apache.commons.lang3.StringUtils.containsIgnoreCase(
+      if (StringUtils.containsIgnoreCase(
           messageContentRaw, "MedTech")) {
         toPrint.appendCodeBlock(parser.output(MEDTECH).getContentRaw(), "JSON");
-      } else if (org.apache.commons.lang3.StringUtils.containsIgnoreCase(
+      } else if (StringUtils.containsIgnoreCase(
           messageContentRaw, "Benny")) {
         toPrint.appendCodeBlock(parser.output(BENNY).getContentRaw(), "JSON");
       } else {
@@ -105,13 +108,11 @@ public class Listener extends ListenerAdapter {
     EmbedBuilder eb = new EmbedBuilder();
     eb.setTitle("SheetBot Commands")
         .setColor(lightBlue);
-    StringBuilder string = new StringBuilder();
-    for (String command
-        : COMMANDS) {
-      string.append("` !sheet ").append(command).append("`").append("\n\n");
-    }
+    String string = COMMANDS.stream()
+        .map(command -> "` !sheet " + command + "`" + "\n\n")
+        .collect(Collectors.joining());
     eb.addField("",
-        string.toString(), false);
+        string, false);
     event.getChannel()
         .sendMessage(eb.build()).queue();
   }

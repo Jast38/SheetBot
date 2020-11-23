@@ -37,21 +37,18 @@ public class SheetParser {
 
     List<List<Object>> values = sheety.getCells();
 
-    if (values == null || values.isEmpty()) {
+    if ((values == null) || values.isEmpty()) {
       return new MessageBuilder()
           .append("No data recognized, is the spreadsheet empty?")
           .build();
     } else {
       for (List row : values) {
         for (int i = 0; i < row.size(); i++) {
-          //System.out.print(row.get(i) + " ");
           returnMessageBuilder.append(row.get(i)).append(" ");
           if (Objects.equals(row.get(i), "")) {
-            //System.out.print("|         ");
             returnMessageBuilder.append("|         ");
           }
           if (i == row.size() - 1) {
-            //System.out.print("|\n");
             returnMessageBuilder.append("|\n");
           }
         }
