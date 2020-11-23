@@ -67,7 +67,7 @@ public class Listener extends ListenerAdapter {
 
   //TODO: add to database, check for Validity of Name, check for guild
   // -> only allow if member of that guild added
-  // db: name(id)-spreadsheetId-guild-addedBy-addedDate
+  // Database: id(auto) -- name -- spreadsheetId -- author -- guild -- date
   private void reactToSheet(final TextChannel channel,
                             final User author,
                             final String messageContentRaw) {
