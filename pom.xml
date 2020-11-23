@@ -13,7 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!--<maven.compiler.source>1.14</maven.compiler.source>
         <maven.compiler.target>1.14</maven.compiler.target>-->
-        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.release>14</maven.compiler.release>
     </properties>
     <repositories>
         <repository>
@@ -123,7 +123,7 @@
                     <configuration>
                         <!--<source>1.14</source>
                         <target>1.14</target>-->
-                        <release>11</release>
+                        <release>14</release>
                     </configuration>
                 </plugin>
                 <plugin>
