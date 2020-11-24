@@ -28,6 +28,7 @@ public class SheetBot {
     Listener listen = new Listener(dataManager);
     JDA jda = null;
 
+    //builder.addEventListeners(new Command())
     builder.addEventListeners(listen);
     builder.setActivity(Activity.listening("!sheet help"));
     try {
