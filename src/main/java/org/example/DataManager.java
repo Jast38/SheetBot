@@ -1,7 +1,6 @@
 package org.example;
 
 import com.google.auth.oauth2.GoogleCredentials;
-
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
@@ -14,7 +13,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Objects;
 
@@ -67,7 +65,8 @@ public class DataManager {
       throws IOException {
     String[] returnString = new String[2];
     DataInputStream dataStream = new DataInputStream(getFile(resourcePath));
-    BufferedReader buffer = new BufferedReader(new InputStreamReader(dataStream));
+    BufferedReader buffer = new BufferedReader(
+        new InputStreamReader(dataStream));
 
     for (int i = 0; i < 2; i++) {
       returnString[i] = buffer.readLine();
@@ -89,7 +88,8 @@ public class DataManager {
   }
 
   //TODO: implement String verification to prevent SQL Injection
-  public String getSingleSqlValue(String columnId, String primaryKey)
+  public String getSingleSqlValue(final String columnId,
+                                  final String primaryKey)
       throws SQLException, IOException {
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -110,7 +110,7 @@ public class DataManager {
     return returnString;
   }
 
-  public ResultSet getSqlRow(String primaryKey) throws IOException,
+  public ResultSet getSqlRow(final String primaryKey) throws IOException,
       SQLException {
     Connection conn = null;
     PreparedStatement stmt = null;
@@ -131,14 +131,16 @@ public class DataManager {
     return returnSet;
   }
 
-  public void insertSqlEntry(String name, String spreadsheetId, String author,
-                             String guild) throws SQLException, IOException {
+  public void insertSqlEntry(final String name, final String spreadsheetId,
+                             final String author, final String guild)
+      throws SQLException, IOException {
     Connection conn = null;
     PreparedStatement stmt = null;
     try {
       conn = Objects.requireNonNull(connectSqlDatabase());
-      stmt = conn.prepareStatement("insert into sheets " +
-          "(name, spreadsheetid, author, guild, date ) values (?,?,?,?,NOW())");
+      stmt = conn.prepareStatement("insert into sheets "
+          + "(name, spreadsheetid, author, guild, date ) "
+          + "values (?,?,?,?,NOW())");
       stmt.setString(1, name);
       stmt.setString(2, spreadsheetId);
       stmt.setString(3, author);
@@ -149,7 +151,8 @@ public class DataManager {
     }
   }
 
-  private void closeSqlConnection(Connection conn, PreparedStatement stmt) {
+  private void closeSqlConnection(final Connection conn,
+                                  final PreparedStatement stmt) {
     try {
       if (stmt != null) {
         stmt.close();
