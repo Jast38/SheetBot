@@ -149,7 +149,7 @@ public class Listener extends ListenerAdapter {
                 spreadsheetid =  sqlSet.getString("spreadsheetid");
               }
             }
-    } catch (SQLException e) {
+    } catch (SQLException | IOException e) {
       System.out.println(e.getMessage());
       return null;
     }

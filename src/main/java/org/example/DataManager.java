@@ -1,6 +1,7 @@
 package org.example;
 
 import com.google.auth.oauth2.GoogleCredentials;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
@@ -10,27 +11,22 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Objects;
 
-//TODO: implement database to save Spreadsheet IDs with corresponding names and
-// messages/logs
+//TODO: connect to db only on call, sanitize using prepared statements
 public class DataManager {
-  private final Statement stmt;
-
-  public DataManager() throws IOException {
-    stmt = connectSqlDatabase();
-  }
 
   private InputStream getFile(final String resourcePath)
       throws FileNotFoundException {
     InputStream in = DataManager.class.getResourceAsStream(resourcePath);
     if (in == null) {
       throw new FileNotFoundException("File not found "
-      + resourcePath);
+          + resourcePath);
     }
     return in;
   }
@@ -55,7 +51,7 @@ public class DataManager {
    * Get Google credentials from local file.
    *
    * @param resourcePath path to credential file in resource folder
-   * @param scopes scopes to get credentials for
+   * @param scopes       scopes to get credentials for
    * @return Google credentials for HttpCredentialsAdapter
    * @throws IOException if IO fails
    */
@@ -68,7 +64,7 @@ public class DataManager {
   }
 
   private String[] getDbCreds(final String resourcePath)
-      throws IOException{
+      throws IOException {
     String[] returnString = new String[2];
     DataInputStream dataStream = new DataInputStream(getFile(resourcePath));
     BufferedReader buffer = new BufferedReader(new InputStreamReader(dataStream));
@@ -79,14 +75,13 @@ public class DataManager {
     return returnString;
   }
 
-  private Statement connectSqlDatabase() throws IOException {
+  private Connection connectSqlDatabase() throws IOException {
     String dbResourcePath = "/creds_db.txt";
     String[] credentials = getDbCreds(dbResourcePath);
     try {
-      Connection conn = DriverManager.getConnection(
+      return DriverManager.getConnection(
           "jdbc:mysql://localhost:3306/sheetbot", credentials[0],
           credentials[1]);
-      return conn.createStatement();
     } catch (SQLException e) {
       e.printStackTrace();
       return null;
@@ -95,36 +90,79 @@ public class DataManager {
 
   //TODO: implement String verification to prevent SQL Injection
   public String getSingleSqlValue(String columnId, String primaryKey)
-      throws SQLException {
-    String query = "select " + columnId + " from sheets where name = '"
-        + primaryKey + "'";
+      throws SQLException, IOException {
+    Connection conn = null;
+    PreparedStatement stmt = null;
     String returnString = "";
-    ResultSet resultSet = stmt.executeQuery(query);
-    if (resultSet.next()) {
-      returnString = resultSet.getString(1);
+
+    try {
+      conn = Objects.requireNonNull(connectSqlDatabase());
+      stmt = conn.prepareStatement("SELECT " + columnId
+          + " from sheets where name = ?");
+      stmt.setString(1, primaryKey);
+      ResultSet resultSet = stmt.executeQuery();
+      if (resultSet.next()) {
+        returnString = resultSet.getString(1);
+      }
+    } finally {
+      closeSqlConnection(conn, stmt);
     }
     return returnString;
   }
 
-  public ResultSet getSqlRow(String primaryKey) throws SQLException {
-    if (primaryKey.equals("all")) {
-      return stmt.executeQuery("select * from sheets");
-
-    } else {
-      return stmt.executeQuery("select * from sheets where name= '"
-          + primaryKey +"'");
+  public ResultSet getSqlRow(String primaryKey) throws IOException,
+      SQLException {
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    ResultSet returnSet;
+    try {
+      conn = Objects.requireNonNull(connectSqlDatabase());
+      if (primaryKey.equals("all")) {
+        returnSet = conn.createStatement()
+            .executeQuery("select * from sheets");
+      } else {
+        stmt = conn.prepareStatement("SELECT * from sheets where name = ?");
+        stmt.setString(1, primaryKey);
+        returnSet = stmt.executeQuery();
+      }
+    } finally {
+      closeSqlConnection(conn, stmt);
     }
+    return returnSet;
   }
 
   public void insertSqlEntry(String name, String spreadsheetId, String author,
-                             String guild) throws SQLException {
-    String tableFormat = "(name, spreadsheetid, author, guild, date ) ";
-    String insert = "insert into sheets " + tableFormat + "values " + "('"
-        + name + "', '" + spreadsheetId + "', '" + author + "', '" + guild
-        +"', NOW())";
+                             String guild) throws SQLException, IOException {
+    Connection conn = null;
+    PreparedStatement stmt = null;
+    try {
+      conn = Objects.requireNonNull(connectSqlDatabase());
+      stmt = conn.prepareStatement("insert into sheets " +
+          "(name, spreadsheetid, author, guild, date ) values (?,?,?,?,NOW())");
+      stmt.setString(1, name);
+      stmt.setString(2, spreadsheetId);
+      stmt.setString(3, author);
+      stmt.setString(4, guild);
+      stmt.executeUpdate();
+    } finally {
+      closeSqlConnection(conn, stmt);
+    }
+  }
 
-    stmt.executeQuery(insert);
-
+  private void closeSqlConnection(Connection conn, PreparedStatement stmt) {
+    try {
+      if (stmt != null) {
+        stmt.close();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    try {
+      if (conn != null) {
+        conn.close();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }
-
