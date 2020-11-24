@@ -7,11 +7,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Collectors;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -74,7 +82,7 @@ public class Listener extends ListenerAdapter {
     MessageBuilder toPrint = new MessageBuilder()
         .append(author.getAsMention())
         .append("\n\n");
-    String spreadsheetid = ifAuthorizedReturnID(event);
+    String spreadsheetid = ifAuthorizedReturnId(event);
     System.out.println(spreadsheetid == null ? "something went wrong"
         : spreadsheetid);
 
@@ -86,7 +94,8 @@ public class Listener extends ListenerAdapter {
           toPrint.replaceFirst("```JSON", "```JAVA");
         }
       } else {
-        toPrint.append("Something went wrong. Are you authorised to view this?");
+        toPrint.append("Something went wrong. "
+            + "Are you authorised to view this?");
       }
     } catch (GeneralSecurityException | IOException e) {
       e.printStackTrace();
@@ -114,7 +123,7 @@ public class Listener extends ListenerAdapter {
         .sendMessage(eb.build()).queue();
   }
 
-  private void deleteAfterDelay(Message message) {
+  private void deleteAfterDelay(final Message message) {
     TimerTask delete = new TimerTask() {
       @Override
       public void run() {
@@ -132,7 +141,7 @@ public class Listener extends ListenerAdapter {
     System.out.println("Deletion scheduled for " + delay);
   }
 
-  private String ifAuthorizedReturnID(GuildMessageReceivedEvent event) {
+  private String ifAuthorizedReturnId(final GuildMessageReceivedEvent event) {
     String author = event.getAuthor().getName();
     String guild = event.getGuild().getName();
     String msg = event.getMessage().getContentRaw();
@@ -140,15 +149,15 @@ public class Listener extends ListenerAdapter {
     String spreadsheetName = splitMessage[2].toLowerCase();
     String spreadsheetid = null;
 
-    try (ResultSet sqlSet = dataManager.getSqlRow(spreadsheetName)){
-            if (sqlSet.next()) {
-              if (
-              Objects.equals(author, sqlSet.getString("author"))
-              || Objects.equals(guild, sqlSet.getString("guild"))
-              ) {
-                spreadsheetid =  sqlSet.getString("spreadsheetid");
-              }
-            }
+    try (ResultSet sqlSet = dataManager.getSqlRow(spreadsheetName)) {
+      if (sqlSet.next()) {
+        if (
+            Objects.equals(author, sqlSet.getString("author"))
+                || Objects.equals(guild, sqlSet.getString("guild"))
+        ) {
+          spreadsheetid = sqlSet.getString("spreadsheetid");
+        }
+      }
     } catch (SQLException | IOException e) {
       System.out.println(e.getMessage());
       return null;
