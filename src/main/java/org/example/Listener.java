@@ -3,19 +3,19 @@ package org.example;
 import java.awt.Color;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.apache.commons.lang3.StringUtils;
 
-//TODO: Iterate through COMMANDS, invoke corresponding Method when Command
+//TODOevtl: Iterate through COMMANDS, invoke corresponding Method when Command
 // recognized using  String Split and Reflection API
 //TODO: add argument to SheetParser to specify Day
 public class Listener extends ListenerAdapter {
@@ -24,10 +24,6 @@ public class Listener extends ListenerAdapter {
       "help",
       "print",
       "admin"));
-  private static final String MEDTECH =
-      "1dAEegeAXQArH_FXoSdETV8XsP4Dt7uAFaEt4-VpP0vY";
-  private static final String BENNY =
-      "1-xniicYlY5jNJiqv6qGSTVO40W_cpme9qZOorfQb1AE";
   private final DataManager dataManager;
 
   public Listener(final DataManager manager) {
@@ -63,38 +59,39 @@ public class Listener extends ListenerAdapter {
       } else if (msg.contains("admin")) {
         reactToAdmin();
       } else if (msg.contains("print")) {
-        reactToSheet(event.getChannel(), author, msg);
+        reactToSheet(event, author, msg);
       }
     }
   }
 
-  //TODO: add to database, check for Validity of Name, check for guild
-  // -> only allow if member of that guild added
+  //TODO: add to database
+
   // Database: id(auto) -- name -- spreadsheetId -- author -- guild -- date
-  private void reactToSheet(final TextChannel channel,
+  private void reactToSheet(final GuildMessageReceivedEvent event,
                             final User author,
                             final String messageContentRaw) {
     SheetParser parser = new SheetParser(dataManager);
     MessageBuilder toPrint = new MessageBuilder()
         .append(author.getAsMention())
         .append("\n\n");
+    String spreadsheetid = ifAuthorizedReturnID(event);
+    System.out.println(spreadsheetid == null ? "something went wrong"
+        : spreadsheetid);
+
     try {
-      if (StringUtils.containsIgnoreCase(
-          messageContentRaw, "MedTech")) {
-        toPrint.appendCodeBlock(parser.output(MEDTECH).getContentRaw(), "JSON");
-      } else if (StringUtils.containsIgnoreCase(
-          messageContentRaw, "Benny")) {
-        toPrint.appendCodeBlock(parser.output(BENNY).getContentRaw(), "JSON");
+      if (spreadsheetid != null) {
+        toPrint.appendCodeBlock(parser.output(spreadsheetid).getContentRaw(),
+            "JSON");
+        if (messageContentRaw.contains("keep")) {
+          toPrint.replaceFirst("```JSON", "```JAVA");
+        }
       } else {
-        toPrint.append("No SpreadsheetId for this name. Typo?");
+        toPrint.append("Something went wrong. Are you authorised to view this?");
       }
     } catch (GeneralSecurityException | IOException e) {
       e.printStackTrace();
     }
-    if (messageContentRaw.contains("keep")) {
-      toPrint.replaceFirst("```JSON", "```JAVA");
-    }
-    channel.sendMessage(toPrint.build())
+    event.getChannel().sendMessage(toPrint.build())
         .queue();
   }
 
@@ -133,6 +130,30 @@ public class Listener extends ListenerAdapter {
     Timer timer = new Timer();
     timer.schedule(delete, delay);
     System.out.println("Deletion scheduled for " + delay);
+  }
+
+  private String ifAuthorizedReturnID(GuildMessageReceivedEvent event) {
+    String author = event.getAuthor().getName();
+    String guild = event.getGuild().getName();
+    String msg = event.getMessage().getContentRaw();
+    String[] splitMessage = msg.split(" ");
+    String spreadsheetName = splitMessage[2].toLowerCase();
+    String spreadsheetid = null;
+
+    try (ResultSet sqlSet = dataManager.getSqlRow(spreadsheetName)){
+            if (sqlSet.next()) {
+              if (
+              Objects.equals(author, sqlSet.getString("author"))
+              || Objects.equals(guild, sqlSet.getString("guild"))
+              ) {
+                spreadsheetid =  sqlSet.getString("spreadsheetid");
+              }
+            }
+    } catch (SQLException e) {
+      System.out.println(e.getMessage());
+      return null;
+    }
+    return spreadsheetid;
   }
 }
 

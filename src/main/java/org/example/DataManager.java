@@ -19,8 +19,6 @@ import java.util.Objects;
 //TODO: implement database to save Spreadsheet IDs with corresponding names and
 // messages/logs
 public class DataManager {
-  private final String tableFormat =
-      "(name, spreadsheetid, author, guild, date ) ";
   private final Statement stmt;
 
   public DataManager() throws IOException {
@@ -108,17 +106,19 @@ public class DataManager {
     return returnString;
   }
 
-  public ResultSet getSqlValues(String columnName) throws SQLException {
-    if (columnName.equals("all")) {
-      return stmt.executeQuery("select * from sheet");
+  public ResultSet getSqlRow(String primaryKey) throws SQLException {
+    if (primaryKey.equals("all")) {
+      return stmt.executeQuery("select * from sheets");
 
     } else {
-      return stmt.executeQuery("select " + columnName + " from sheet");
+      return stmt.executeQuery("select * from sheets where name= '"
+          + primaryKey +"'");
     }
   }
 
   public void insertSqlEntry(String name, String spreadsheetId, String author,
                              String guild) throws SQLException {
+    String tableFormat = "(name, spreadsheetid, author, guild, date ) ";
     String insert = "insert into sheets " + tableFormat + "values " + "('"
         + name + "', '" + spreadsheetId + "', '" + author + "', '" + guild
         +"', NOW())";
