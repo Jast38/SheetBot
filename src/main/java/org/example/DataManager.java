@@ -16,7 +16,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
-//TODO: connect to db only on call, sanitize using prepared statements
 public class DataManager {
 
   private InputStream getFile(final String resourcePath)

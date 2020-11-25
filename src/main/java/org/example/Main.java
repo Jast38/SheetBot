@@ -14,5 +14,6 @@ public class Main {
   public static void main(final String[] args) throws IOException {
     DataManager dataManager = new DataManager();
     SheetBot bot = new SheetBot(dataManager);
+    bot.startBot();
   }
 }
