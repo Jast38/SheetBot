@@ -7,5 +7,5 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
  * @author Jannick Stuby
  * @version 11/24/20
  */
-public class adminHandler extends ListenerAdapter {
+public class AdminHandler extends ListenerAdapter {
 }
