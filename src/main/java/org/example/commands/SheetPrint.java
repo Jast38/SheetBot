@@ -23,7 +23,7 @@ import java.util.Objects;
 public class SheetPrint {
   private final DataManager dataManager;
   private final GuildMessageReceivedEvent event;
-  private final static Map<String, String> DAYS
+  private static final Map<String, String> DAYS
       = ImmutableMap.of(
       "montag", "B4:E17",
       "dienstag", "F4:I17",

@@ -1,10 +1,12 @@
 package org.example.commands;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.message.MessageEmbedEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.example.DataManager;
@@ -44,9 +46,12 @@ public class SheetHandler extends ListenerAdapter {
         + " in guild "
         + guild.getName()
     );
-    if (!msg.contains("```JAVA") && Objects.equals(member,
+    if (msg.contains("```JSON") && Objects.equals(member,
         guild.getSelfMember())) {
       changeAfterDelay(message, 1, "edit");
+    }else if (Objects.equals(member, guild.getSelfMember()) &&
+        !msg.contains("```JAVA")) {
+      changeAfterDelay(message, 1, "delete");
     } else if (msg.startsWith("!sheet")) {
       changeAfterDelay(message, 0, "delete");
       String[] msgArray = msg.split(" ");
@@ -59,7 +64,8 @@ public class SheetHandler extends ListenerAdapter {
           helper.react();
         } else if (msgArray[1].equalsIgnoreCase("print")) {
           SheetPrint printer;
-          if ((msgArray.length >= 4)) {
+          if ((msgArray.length >= 4) && !(msgArray[3]
+              .equalsIgnoreCase("keep"))) {
             printer = new SheetPrint(event,
                 dataManager, msgArray[3].toLowerCase());
           } else {
@@ -105,7 +111,7 @@ public class SheetHandler extends ListenerAdapter {
       }
       System.out.println("Deletion scheduled for " + delay);
     } else {
-      timer.schedule(delete, 2500L);
+      timer.schedule(delete, 1500L);
     }
   }
 }
