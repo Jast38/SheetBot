@@ -1,13 +1,19 @@
 package org.example.commands;
 
+import com.google.common.collect.ImmutableMap;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.example.DataManager;
 import org.example.SheetParser;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.temporal.IsoFields;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -17,17 +23,28 @@ import java.util.Objects;
 public class SheetPrint {
   private final DataManager dataManager;
   private final GuildMessageReceivedEvent event;
+  private final static Map<String, String> DAYS
+      = ImmutableMap.of(
+      "montag", "B4:E17",
+      "dienstag", "F4:I17",
+      "mittwoch","J4:M17",
+      "donnerstag", "N4:Q17",
+      "freitag", "R4:U17");
+  private final String dayToGet;
 
-  public SheetPrint(GuildMessageReceivedEvent event, DataManager dataManager) {
+  public SheetPrint(GuildMessageReceivedEvent event, DataManager dataManager,
+                    String day) {
     this.dataManager = dataManager;
     this.event = event;
+    this.dayToGet = day;
   }
 
   public void react() {
     String spreadsheetId = ifAuthorizedReturnId(event);
+    String range = computeRange();
     if (spreadsheetId != null) {
-      getSpreadsheet(spreadsheetId);
-    } else{
+      getSpreadsheet(spreadsheetId, range);
+    } else {
       System.out.println("something went wrong, spreadsheetId == null");
       event.getChannel().sendMessage(event.getAuthor().getAsMention())
           .append("\n\n")
@@ -37,8 +54,19 @@ public class SheetPrint {
     }
   }
 
-  private void getSpreadsheet(String spreadsheetId) {
-    SheetParser parser = new SheetParser(dataManager);
+  private String computeRange() {
+    LocalDate date = LocalDate.now();
+    int week = date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+    String dayRange = DAYS.get(dayToGet);
+    if (dayRange.equals(null)) {
+      throw new NoSuchElementException();
+    } else {
+      return "KW " + week + "!" + dayRange;
+    }
+  }
+
+  private void getSpreadsheet(String spreadsheetId, String range) {
+    SheetParser parser = new SheetParser(dataManager, range);
     MessageBuilder toPrint = new MessageBuilder()
         .append(event.getAuthor().getAsMention())
         .append("\n\n");
