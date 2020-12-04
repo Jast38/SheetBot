@@ -42,6 +42,10 @@ public class SheetHandler extends ListenerAdapter {
         + message.getContentDisplay()
         + " in guild "
         + guild.getName()
+        + " in channel "
+        + event.getChannel().getId()
+        + " "
+        + event.getChannel()
     );
     if (msg.contains("```JSON") && Objects.equals(member,
         guild.getSelfMember())) {
